@@ -24,12 +24,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
         <provider
             android:authorities="com.example.notesapp_final_glennlorenzet"
-            android:name="com.example.notesapp_final_glennlorenzet.NoteContentProvider"
-            android:exported="false" />
+            android:name=".NoteContentProvider" />
     </application>
 
 </manifest>

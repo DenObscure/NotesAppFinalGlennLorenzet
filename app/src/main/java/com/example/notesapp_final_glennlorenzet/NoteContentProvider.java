@@ -22,24 +22,19 @@ import static com.example.notesapp_final_glennlorenzet.NotesContract.NoteEntry.T
  *  URI CERTAIN COLUMN  -> com.example.notesapp_final_glennlorenzet.NoteContentProvider/notes/*
  */
 
-public class NoteContentProvider extends ContentProvider
+public class
+NoteContentProvider extends ContentProvider
 {
     private NotesDbHelper mNotesDbHelper;
-
-
 
     static final String id = "id";
     static final String title = "title";
     static final String PROVIDER_NAME = "com.example.notesapp_final_glennlorenzet.NoteContentProvider";
     static final String URL = "content://" + PROVIDER_NAME + "/notes";
     static final Uri CONTENT_URI = Uri.parse(URL);
-    static final int uriCode = 1;
-    static final UriMatcher uriMatcher;
-    static {
-        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, "notes", uriCode);
-        uriMatcher.addURI(PROVIDER_NAME, "notes/*", uriCode);
-    }
+    static final int ALLNOTES = 1;
+    static final int ONENOTE = 2;
+
     private static HashMap<String, String> values;
     private SQLiteDatabase db;
 
@@ -60,15 +55,15 @@ public class NoteContentProvider extends ContentProvider
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(TABLE_NAME);
 
-        switch (uriMatcher.match(uri)) {
-            case uriCode:
+        switch (NotesContract.buildUriMatcher().match(uri)) {
+            case ALLNOTES:
                 qb.setProjectionMap(values);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
         if (sortOrder == null || sortOrder == "") {
-            sortOrder = id;
+            sortOrder = null;
         }
         Cursor c = qb.query(db, projection, selection, selectionArgs, null,
                 null, sortOrder);
@@ -78,8 +73,8 @@ public class NoteContentProvider extends ContentProvider
 
     @Override
     public String getType(Uri uri){
-        switch (uriMatcher.match(uri)) {
-            case uriCode:
+        switch (NotesContract.buildUriMatcher().match(uri)) {
+            case ALLNOTES:
                 return "com.example.notesapp_final_glennlorenzet.NoteContentProvider/notes";
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -100,8 +95,8 @@ public class NoteContentProvider extends ContentProvider
     @Override
     public int delete( Uri uri,String selection, String[] selectionArgs) {
         int count = 0;
-        switch (uriMatcher.match(uri)) {
-            case uriCode:
+        switch (NotesContract.buildUriMatcher().match(uri)) {
+            case ALLNOTES:
                 count = db.delete(TABLE_NAME, selection, selectionArgs);
                 break;
             default:
@@ -114,8 +109,8 @@ public class NoteContentProvider extends ContentProvider
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int count = 0;
-        switch (uriMatcher.match(uri)) {
-            case uriCode:
+        switch (NotesContract.buildUriMatcher().match(uri)) {
+            case ALLNOTES:
                 count = db.update(TABLE_NAME, values, selection, selectionArgs);
                 break;
             default:

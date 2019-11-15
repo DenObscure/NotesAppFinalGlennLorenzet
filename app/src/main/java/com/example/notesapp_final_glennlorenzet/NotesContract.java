@@ -9,7 +9,7 @@ public final class NotesContract {
     public static final String AUTHORITY = "com.example.notesapp_final_glennlorenzet";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
-    public static final String NOTE_PATH = "note";
+    public static final String NOTE_PATH = "notes";
 
     public static final int ALL_NOTES = 1;
     public static final int NOTE_ID = 2;

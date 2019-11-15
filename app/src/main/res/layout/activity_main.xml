@@ -22,7 +22,7 @@
 
     <fragment
         android:name="com.example.notesapp_final_glennlorenzet.MasterListFragment"
-        android:id="@+id/fooFragment"
+        android:id="@+id/fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
