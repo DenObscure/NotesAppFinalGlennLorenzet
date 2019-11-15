@@ -56,9 +56,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         fab.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-
                 Intent intent = new Intent(MainActivity.this, NewNoteActivity.class);
                 startActivityForResult(intent, NEW_NOTE_REQUEST);
             }
@@ -69,18 +66,18 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         // READ FROM DB
 
         // A "projection" defines the columns that will be returned for each row
-                String[] mProjection =
-                        {
-                                NotesContract.NoteEntry._ID,    // Contract class constant for the _ID column name
-                                NotesContract.NoteEntry.COLUMN_NAME_TITLE,   // Contract class constant for the word column name
-                                NotesContract.NoteEntry.COLUMN_NAME_CONTENT  // Contract class constant for the locale column name
-                        };
+        String[] mProjection =
+        {
+                NotesContract.NoteEntry._ID,    // Contract class constant for the _ID column name
+                NotesContract.NoteEntry.COLUMN_NAME_TITLE,   // Contract class constant for the word column name
+                NotesContract.NoteEntry.COLUMN_NAME_CONTENT  // Contract class constant for the locale column name
+        };
 
         // Defines a string to contain the selection clause
-                String selectionClause = null;
+        String selectionClause = null;
 
         // Initializes an array to contain selection arguments
-                String[] selectionArgs = null;
+        String[] selectionArgs = null;
 
         // Does a query against the table and returns a Cursor object
         Cursor mCursor = getContentResolver().query(
@@ -98,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
              * call android.util.Log.e() to log this error.
              *
              */
+
+
         // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
 
@@ -106,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
              * an error. You may want to offer the user the option to insert a new row, or re-type the
              * search term.
              */
+
 
         } else {
             // Insert code here to do something with the results
@@ -236,32 +236,50 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
             if (resultCode == RESULT_OK) {
 
                 if (data.getStringExtra("action").equals("edit")) {
-                    ContentValues cv = new ContentValues();
-                    cv.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("newTitle"));
-                    cv.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, data.getStringExtra("newContent"));
+                    // Defines an object to contain the updated values
+                    ContentValues updateValues = new ContentValues();
 
-                    NotesDbHelper dbHelper = new NotesDbHelper(MainActivity.this);
+                    //updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("title"));
+                    updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("newTitle"));
+                    updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, data.getStringExtra("newContent"));
 
-                    SQLiteDatabase wdb = dbHelper.getWritableDatabase();
-                    wdb.update(NotesContract.NoteEntry.TABLE_NAME, cv, NotesContract.NoteEntry._ID + "=" + data.getStringExtra("id"), null);
-                    System.out.println("EDITED SOMETHING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    // Defines selection criteria for the rows you want to update
+                    String selectionClause = NotesContract.NoteEntry._ID +  " LIKE ?";
+                    String[] selectionArgs = {data.getStringExtra("id")};
+
+                    // Defines a variable to contain the number of updated rows
+                    int rowsUpdated = 0;
+
+                    /*
+                     * Sets the updated value and updates the selected words.
+                     */
+
+                    rowsUpdated = getContentResolver().update(
+                            NotesContract.NoteEntry.CONTENT_URI,// the user dictionary content URI
+                            updateValues,                       // the columns to update
+                            selectionClause,                    // the column to select on
+                            selectionArgs                       // the value to compare to
+                    );
                     finish();
                     startActivity(getIntent());
                 }
                 else if (data.getStringExtra("action").equals("delete"))
                 {
-                    String rowId = data.getStringExtra("id");
+                    // Defines selection criteria for the rows you want to delete
+                    String selectionClause = NotesContract.NoteEntry._ID + " LIKE ?";
+                    String[] selectionArgs = {data.getStringExtra("id")};
 
-                    NotesDbHelper dbHelper = new NotesDbHelper(MainActivity.this);
+                    // Defines a variable to contain the number of rows deleted
+                    int rowsDeleted = 0;
 
-                    SQLiteDatabase wdb = dbHelper.getWritableDatabase();
-                    wdb.delete(
-                            NotesContract.NoteEntry.TABLE_NAME,
-                            NotesContract.NoteEntry._ID + " = ?",
-                            new String[]{rowId});
-                    wdb.close();
 
-                    System.out.println("DELETED SOMETHING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    // Deletes the words that match the selection criteria
+                    rowsDeleted = getContentResolver().delete(
+                            NotesContract.NoteEntry.CONTENT_URI,   // the user dictionary content URI
+                            selectionClause,                   // the column to select on
+                            selectionArgs                      // the value to compare to
+                    );
+
                     finish();
                     startActivity(getIntent());
                 }

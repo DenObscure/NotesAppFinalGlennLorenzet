@@ -116,7 +116,7 @@ NoteContentProvider extends ContentProvider
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        //getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 }
