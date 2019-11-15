@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
@@ -206,29 +207,24 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         if (requestCode == NEW_NOTE_REQUEST) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
+                // Defines a new Uri object that receives the result of the insertion
+                Uri newUri;
 
 
-                // Create new helper
-                NotesDbHelper dbHelper = new NotesDbHelper(MainActivity.this);
-                // Get the database. If it does not exist, this is where it will
-                // also be created.
-                SQLiteDatabase wdb = dbHelper.getWritableDatabase();
+                // Defines an object to contain the new values to insert
+                ContentValues newValues = new ContentValues();
 
-                // Create insert entries
-                ContentValues values = new ContentValues();
-                values.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("title"));
-                values.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, data.getStringExtra("content"));
+                /*
+                 * Sets the values of each column and inserts the word. The arguments to the "put"
+                 * method are "column name" and "value"
+                 */
+                newValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("title"));
+                newValues.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, data.getStringExtra("content"));
 
-                // Insert the new row, returning the primary key value of the new row
-                long newRowId;
-                newRowId = wdb.insert(
-                        NotesContract.NoteEntry.TABLE_NAME,
-                        null,
-                        values);
-
-                Note newNote = new Note(Long.toString(newRowId), data.getStringExtra("title"), data.getStringExtra("content"));
-                notesList.add(newNote);
-                wdb.close();
+                newUri = getContentResolver().insert(
+                        NotesContract.NoteEntry.CONTENT_URI,    // the user dictionary content URI
+                        newValues                               // the values to insert
+                );
 
                 finish();
                 startActivity(getIntent());

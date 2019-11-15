@@ -86,7 +86,7 @@ NoteContentProvider extends ContentProvider
         long rowID = db.insert(TABLE_NAME, "", values);
         if (rowID > 0) {
             Uri _uri = ContentUris.withAppendedId(CONTENT_URI, rowID);
-            getContext().getContentResolver().notifyChange(_uri, null);
+            //getContext().getContentResolver().notifyChange(_uri, null);
             return _uri;
         }
         throw new SQLiteException("Failed to add a record into " + uri);
