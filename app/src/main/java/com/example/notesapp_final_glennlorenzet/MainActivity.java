@@ -338,9 +338,9 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         }
     }
 
-    public void updateItem(int i)
+    public void updateItem(int i, Note n)
     {
-        mAdapter.updateItemFromListAt(i);
-
+        mAdapter.updateItemFromListAt(i, n);
+        View v = this.getCurrentFocus();
     }
 }

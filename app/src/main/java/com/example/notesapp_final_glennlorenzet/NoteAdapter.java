@@ -79,8 +79,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
         notifyItemRemoved(index);
     }
 
-    public void updateItemFromListAt(int index) {
-
+    public void updateItemFromListAt(int index, Note n) {
+        list.set(index, n);
         notifyItemChanged(index);
     }
 

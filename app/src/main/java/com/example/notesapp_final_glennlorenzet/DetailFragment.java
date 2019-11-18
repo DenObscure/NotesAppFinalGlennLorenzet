@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -111,8 +112,10 @@ public class DetailFragment extends Fragment {
                         selectionArgs                       // the value to compare to
                 );
 
-                int noteid = getArguments().getInt(ARG_INDEX);
-                ((MainActivity)getActivity()).updateItem(noteid);
+                int index = getArguments().getInt(ARG_INDEX);
+
+                ((MainActivity)getActivity()).updateItem(index, new Note(getArguments().getString(ARG_NOTE_ID), title.getText().toString(), content.getText().toString()));
+                closeKeyboard();
             }
         });
 
@@ -140,9 +143,21 @@ public class DetailFragment extends Fragment {
                 );
                 int noteid = getArguments().getInt(ARG_INDEX);
                 ((MainActivity)getActivity()).removeItem(noteid);
+
+                closeKeyboard();
             }
         });
 
         return rootView;
+    }
+
+    public void closeKeyboard()
+    {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+        getActivity().getWindow().getDecorView().clearFocus();
     }
 }
