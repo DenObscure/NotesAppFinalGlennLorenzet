@@ -326,18 +326,21 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         }
     }
 
-    public void removeItem(int s)
+    public void removeItem(int i)
     {
-        System.out.println("NOTIFYYYY");
-        System.out.println(s);
+        mAdapter.removeFromListAt(i);
 
-        mAdapter.removeFromListAt(s);
-
-
+        // remove fragment
         if(getSupportFragmentManager().findFragmentById(R.id.item_detail_container) != null) {
             getSupportFragmentManager()
                     .beginTransaction().
                     remove(getSupportFragmentManager().findFragmentById(R.id.item_detail_container)).commit();
         }
+    }
+
+    public void updateItem(int i)
+    {
+        mAdapter.updateItemFromListAt(i);
+
     }
 }

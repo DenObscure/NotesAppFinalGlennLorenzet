@@ -104,11 +104,6 @@ public class DetailFragment extends Fragment {
                  * Sets the updated value and updates the selected words.
                  */
 
-                System.out.println(" KIJK HIER!::::");
-                System.out.println(ARG_NOTE_ID);
-                System.out.println(title.getText().toString());
-                        System.out.println(content.getText().toString());
-
                 rowsUpdated = getActivity().getContentResolver().update(
                         NotesContract.NoteEntry.CONTENT_URI,// the user dictionary content URI
                         updateValues,                       // the columns to update
@@ -117,7 +112,7 @@ public class DetailFragment extends Fragment {
                 );
 
                 int noteid = getArguments().getInt(ARG_INDEX);
-                //((MainActivity)getActivity()).refresh(noteid);
+                ((MainActivity)getActivity()).updateItem(noteid);
             }
         });
 
