@@ -71,7 +71,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
      *    Total number of ViewHolders = 11
      */
     private static int viewHolderCount;
-    private int selectedPosition=-1;
+    private int selectedPosition = -1;
+
+    public void removeFromListAt(int index) {
+        list.remove(index);
+        mNumberItems -= 1;
+        notifyItemRemoved(index);
+    }
 
     /**
      * The interface that receives onClick messages.
@@ -84,8 +90,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
      * Constructor for NoteAdapter that accepts a number of items to display and the specification
      * for the ListItemClickListener.
      *
-     * @param numberOfItems Number of items to display in list
-     * @param listener Listener for list item clicks
+     * @param listener      Listener for list item clicks
      */
     public NoteAdapter(ArrayList<Note> notes, ListItemClickListener listener) {
         mNumberItems = notes.size();
@@ -95,7 +100,6 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
     }
 
     /**
-     *
      * This gets called when each new ViewHolder is created. This happens when the RecyclerView
      * is laid out. Enough ViewHolders will be created to fill the screen and allow for scrolling.
      *
@@ -161,6 +165,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
          * Constructor for our ViewHolder. Within this constructor, we get a reference to our
          * TextViews and set an onClickListener to listen for clicks. Those will be handled in the
          * onClick method below.
+         *
          * @param itemView The View that you inflated in
          *                 {@link NoteAdapter#onCreateViewHolder(ViewGroup, int)}
          */
@@ -176,16 +181,20 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
         /**
          * A method we wrote for convenience. This method will take an integer as input and
          * use that integer to display the appropriate text within a list item.
+         *
          * @param listIndex Position of the item in the list
          */
         void bind(int listIndex) {
 
-            viewHolderIndex.setText(list.get(listIndex).getTitle());
-            // viewHolderIndex.setText(list.get(listIndex).getTitle() + "(" + list.get(listIndex).getId() + ")");
+            if (listIndex < list.size())
+                viewHolderIndex.setText(list.get(listIndex).getTitle());
+                // viewHolderIndex.setText(list.get(listIndex).getTitle() + "(" + list.get(listIndex).getId() + ")");
+
         }
 
         /**
          * Called whenever a user clicks on an item in the list.
+         *
          * @param v The View that was clicked
          */
         @Override

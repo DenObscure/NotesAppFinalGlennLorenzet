@@ -38,12 +38,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
     private RecyclerView mNumbersList;
     private ArrayList<Note> notesList = new ArrayList<Note>();
 
-    // for accessing contentResolver in fragment
-    public static Context contextOfApplication;
-    public static Context getContextOfApplication()
-    {
-        return contextOfApplication;
-    }
 
     /*
      * If we hold a reference to our Toast, we can cancel it (if it's showing)
@@ -51,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
      * in showing up if you clicked many list items in quick succession.
      */
     private Toast mToast;
-
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -181,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         mAdapter = new NoteAdapter(notesList, this);
         mNumbersList.setAdapter(mAdapter);
 
-
     }
 
     @Override
@@ -225,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         {
 
             Bundle arguments = new Bundle();
+            arguments.putInt(DetailFragment.ARG_INDEX, clickedItemIndex);
             arguments.putString(DetailFragment.ARG_NOTE_ID, cNote.getId());
             arguments.putString(DetailFragment.ARG_NOTE_TITLE, cNote.getTitle());
             arguments.putString(DetailFragment.ARG_NOTE_CONTENT, cNote.getContent());
@@ -333,65 +326,18 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (this.getIntent().getExtras() != null) {
-            //DETERMINE WHO STARTED THIS ACTIVITY
-            final String sender = this.getIntent().getExtras().getString("SENDER_KEY");
-
-            //IF ITS THE FRAGMENT THEN RECEIVE DATA
-            if (sender != null) {
-                this.receiveData();
-                Toast.makeText(this, "Received", Toast.LENGTH_SHORT).show();
-
-            }
-        }
-    }
-
-    /*
-RECEIVE DATA FROM FRAGMENT
- */
-    private void receiveData()
+    public void removeItem(int s)
     {
-        //RECEIVE DATA VIA INTENT
-        Intent i = getIntent();
+        System.out.println("NOTIFYYYY");
+        System.out.println(s);
 
-        String title = i.getStringExtra("TITLE_KEY");
-        String content = i.getStringExtra("CONTENT_KEY");
-        String id = i.getStringExtra("ID_KEY");
+        mAdapter.removeFromListAt(s);
 
-        // Defines an object to contain the updated values
-        ContentValues updateValues = new ContentValues();
 
-        //updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("title"));
-        updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, title);
-        updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, content);
-
-        System.out.println("kkkk");
-
-        System.out.println(title);
-        System.out.println(content);
-        // Defines selection criteria for the rows you want to update
-        String selectionClause = NotesContract.NoteEntry._ID +  " LIKE ?";
-        String[] selectionArgs = {id};
-
-        System.out.println(id);
-        // Defines a variable to contain the number of updated rows
-        int rowsUpdated = 0;
-
-        /*
-         * Sets the updated value and updates the selected words.
-         */
-
-        rowsUpdated = getContentResolver().update(
-                NotesContract.NoteEntry.CONTENT_URI,// the user dictionary content URI
-                updateValues,                       // the columns to update
-                selectionClause,                    // the column to select on
-                selectionArgs                       // the value to compare to
-        );
-        finish();
-
+        if(getSupportFragmentManager().findFragmentById(R.id.item_detail_container) != null) {
+            getSupportFragmentManager()
+                    .beginTransaction().
+                    remove(getSupportFragmentManager().findFragmentById(R.id.item_detail_container)).commit();
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
@@ -26,6 +27,7 @@ public class DetailFragment extends Fragment {
      * The fragment argument representing the item ID that this fragment
      * represents.
      */
+    public static final String ARG_INDEX = "index";
     public static final String ARG_NOTE_ID = "note_id";
     public static final String ARG_NOTE_TITLE = "note_title";
     public static final String ARG_NOTE_CONTENT = "note_content";
@@ -53,6 +55,7 @@ public class DetailFragment extends Fragment {
             //mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
 
             Activity activity = this.getActivity();
+
         }
     }
 
@@ -66,31 +69,55 @@ public class DetailFragment extends Fragment {
         //    ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.details);
         //}
 
+
+
         ((TextView) rootView.findViewById(R.id.Edittitletext)).setText(getArguments().getString(ARG_NOTE_TITLE));
         ((TextView) rootView.findViewById(R.id.Editcontenttext)).setText(getArguments().getString(ARG_NOTE_CONTENT));
+
         Button buttonSave = (Button) rootView.findViewById(R.id.Editsavebutton);
         buttonSave.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                System.out.println("Contentressss");
+
+                Uri newUri;
+
                 title = rootView.findViewById(R.id.Edittitletext);
                 content = rootView.findViewById(R.id.Editcontenttext);
 
-                //INTENT OBJ
-                Intent i = new Intent(getActivity().getBaseContext(), MainActivity.class);
+                // Defines an object to contain the updated values
+                ContentValues updateValues = new ContentValues();
 
-                //PACK DATA
-                i.putExtra("SENDER_KEY", "DetailFragment");
-                i.putExtra("ID_KEY", ARG_NOTE_ID);
-                i.putExtra("TITLE_KEY", title.getText().toString());
-                i.putExtra("CONTENT_KEY", content.getText().toString());
+                //updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("title"));
+                updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, title.getText().toString());
+                updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, content.getText().toString());
 
-                //RESET WIDGETS
+                // Defines selection criteria for the rows you want to update
+                String selectionClause = NotesContract.NoteEntry._ID +  " = ?";
+                String[] selectionArgs = {getArguments().getString(ARG_NOTE_ID)};
 
-                //START ACTIVITY
-                getActivity().startActivity(i);
+                // Defines a variable to contain the number of updated rows
+                int rowsUpdated = 0;
+
+                /*
+                 * Sets the updated value and updates the selected words.
+                 */
+
+                System.out.println(" KIJK HIER!::::");
+                System.out.println(ARG_NOTE_ID);
+                System.out.println(title.getText().toString());
+                        System.out.println(content.getText().toString());
+
+                rowsUpdated = getActivity().getContentResolver().update(
+                        NotesContract.NoteEntry.CONTENT_URI,// the user dictionary content URI
+                        updateValues,                       // the columns to update
+                        selectionClause,                    // the column to select on
+                        selectionArgs                       // the value to compare to
+                );
+
+                int noteid = getArguments().getInt(ARG_INDEX);
+                //((MainActivity)getActivity()).refresh(noteid);
             }
         });
 
@@ -116,7 +143,8 @@ public class DetailFragment extends Fragment {
                         selectionClause,                   // the column to select on
                         selectionArgs                      // the value to compare to
                 );
-
+                int noteid = getArguments().getInt(ARG_INDEX);
+                ((MainActivity)getActivity()).removeItem(noteid);
             }
         });
 
