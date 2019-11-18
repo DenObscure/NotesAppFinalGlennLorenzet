@@ -38,12 +38,26 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
     private RecyclerView mNumbersList;
     private ArrayList<Note> notesList = new ArrayList<Note>();
 
+    // for accessing contentResolver in fragment
+    public static Context contextOfApplication;
+    public static Context getContextOfApplication()
+    {
+        return contextOfApplication;
+    }
+
     /*
      * If we hold a reference to our Toast, we can cancel it (if it's showing)
      * to display a new Toast. If we didn't do this, Toasts would be delayed
      * in showing up if you clicked many list items in quick succession.
      */
     private Toast mToast;
+
+
+    /**
+     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
+     * device.
+     */
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,14 +66,31 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (findViewById(R.id.item_detail_container) != null) {
+            // The detail container view will be present only in the
+            // large-screen layouts (res/values-w900dp).
+            // If this view is present, then the
+            // activity should be in two-pane mode.
+            mTwoPane = true;
+            System.out.println("TWOPANE YES");
+        }
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, NewNoteActivity.class);
-                startActivityForResult(intent, NEW_NOTE_REQUEST);
+            @Override
+            public void onClick(View view) {
+                if (mTwoPane)
+                {
+
+                }
+                else
+                {
+                    Intent intent = new Intent(MainActivity.this, NewNoteActivity.class);
+                    startActivityForResult(intent, NEW_NOTE_REQUEST);
+                }
             }
         });
+
 
 
 
@@ -182,23 +213,38 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         if (mToast != null) {
             mToast.cancel();
         }
-
         String toastMessage = "Item #" + clickedItemIndex + " clicked.";
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_LONG);
 
         mToast.show();
 
 
-        // READ FROM DB
-
         Note cNote = notesList.get(clickedItemIndex);
 
-        Intent in = new Intent(MainActivity.this, EditNoteActivity.class);
-        in.putExtra("title", cNote.getTitle());
-        in.putExtra("content", cNote.getContent());
-        in.putExtra("id", cNote.getId());
+        if (mTwoPane)
+        {
 
-        startActivityForResult(in, 2);
+            Bundle arguments = new Bundle();
+            arguments.putString(DetailFragment.ARG_NOTE_ID, cNote.getId());
+            arguments.putString(DetailFragment.ARG_NOTE_TITLE, cNote.getTitle());
+            arguments.putString(DetailFragment.ARG_NOTE_CONTENT, cNote.getContent());
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(arguments);
+            this.getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.item_detail_container, fragment)
+                    .commit();
+        }
+        else
+        {
+
+            Intent in = new Intent(MainActivity.this, EditNoteActivity.class);
+            in.putExtra("title", cNote.getTitle());
+            in.putExtra("content", cNote.getContent());
+            in.putExtra("id", cNote.getId());
+
+            startActivityForResult(in, 2);
+        }
     }
 
     @Override
@@ -285,5 +331,67 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
                 }
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (this.getIntent().getExtras() != null) {
+            //DETERMINE WHO STARTED THIS ACTIVITY
+            final String sender = this.getIntent().getExtras().getString("SENDER_KEY");
+
+            //IF ITS THE FRAGMENT THEN RECEIVE DATA
+            if (sender != null) {
+                this.receiveData();
+                Toast.makeText(this, "Received", Toast.LENGTH_SHORT).show();
+
+            }
+        }
+    }
+
+    /*
+RECEIVE DATA FROM FRAGMENT
+ */
+    private void receiveData()
+    {
+        //RECEIVE DATA VIA INTENT
+        Intent i = getIntent();
+
+        String title = i.getStringExtra("TITLE_KEY");
+        String content = i.getStringExtra("CONTENT_KEY");
+        String id = i.getStringExtra("ID_KEY");
+
+        // Defines an object to contain the updated values
+        ContentValues updateValues = new ContentValues();
+
+        //updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, data.getStringExtra("title"));
+        updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, title);
+        updateValues.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, content);
+
+        System.out.println("kkkk");
+
+        System.out.println(title);
+        System.out.println(content);
+        // Defines selection criteria for the rows you want to update
+        String selectionClause = NotesContract.NoteEntry._ID +  " LIKE ?";
+        String[] selectionArgs = {id};
+
+        System.out.println(id);
+        // Defines a variable to contain the number of updated rows
+        int rowsUpdated = 0;
+
+        /*
+         * Sets the updated value and updates the selected words.
+         */
+
+        rowsUpdated = getContentResolver().update(
+                NotesContract.NoteEntry.CONTENT_URI,// the user dictionary content URI
+                updateValues,                       // the columns to update
+                selectionClause,                    // the column to select on
+                selectionArgs                       // the value to compare to
+        );
+        finish();
+
     }
 }

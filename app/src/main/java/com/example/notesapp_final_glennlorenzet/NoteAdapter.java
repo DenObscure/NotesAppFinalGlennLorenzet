@@ -3,6 +3,7 @@ package com.example.notesapp_final_glennlorenzet;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.provider.BaseColumns;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -70,7 +71,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
      *    Total number of ViewHolders = 11
      */
     private static int viewHolderCount;
-
+    private int selectedPosition=-1;
 
     /**
      * The interface that receives onClick messages.
