@@ -1,5 +1,8 @@
 package com.example.notesapp_final_glennlorenzet;
 
+import android.app.Activity;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +10,9 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.NetworkOnMainThreadException;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.support.design.widget.FloatingActionButton;
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
     private NoteAdapter mAdapter;
     private RecyclerView mNumbersList;
     private ArrayList<Note> notesList = new ArrayList<Note>();
+    private boolean processed = false;
 
 
     /*
@@ -65,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
             // If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
-            System.out.println("TWOPANE YES");
         }
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -74,7 +79,30 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
             public void onClick(View view) {
                 if (mTwoPane)
                 {
+                    // Defines a new Uri object that receives the result of the insertion
+                    Uri newUri;
 
+
+                    // Defines an object to contain the new values to insert
+                    ContentValues newValues = new ContentValues();
+
+                    /*
+                     * Sets the values of each column and inserts the word. The arguments to the "put"
+                     * method are "column name" and "value"
+                     */
+                    newValues.put(NotesContract.NoteEntry.COLUMN_NAME_TITLE, "New Note");
+                    newValues.put(NotesContract.NoteEntry.COLUMN_NAME_CONTENT, "");
+
+                    newUri = getContentResolver().insert(
+                            NotesContract.NoteEntry.CONTENT_URI,    // the user dictionary content URI
+                            newValues                               // the values to insert
+                    );
+
+
+                    String id = newUri.getLastPathSegment();
+
+                    Note newNote = new Note(id, "New Note", "");
+                    mAdapter.addToList(newNote);
                 }
                 else
                 {
@@ -133,11 +161,9 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
 
         } else {
             // Insert code here to do something with the results
-            System.out.println("SUCCES");
             if (mCursor.moveToFirst()) {
                 do {
                     notesList.add(new Note(mCursor.getString(0), mCursor.getString(1), mCursor.getString(2)));
-                    System.out.println(notesList.get(notesList.size() - 1).getTitle());
                 } while (mCursor.moveToNext());
 
             }
@@ -174,6 +200,27 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         mAdapter = new NoteAdapter(notesList, this);
         mNumbersList.setAdapter(mAdapter);
 
+
+        /* IF INTENT COMING FROM WIDGET */
+        Bundle extras = getIntent().getExtras();
+        if (extras != null)
+        {
+            System.out.println(extras);
+            String value = extras.getString("widgetNoteId");
+            if (extras.getString("action").equalsIgnoreCase("widget")) {
+                for (Note note : notesList) {
+                    if (note.getId().equalsIgnoreCase(value)) {
+                        Intent in = new Intent(MainActivity.this, EditNoteActivity.class);
+                        in.putExtra("title", note.getTitle());
+                        in.putExtra("content", note.getContent());
+                        in.putExtra("id", note.getId());
+                        in.putExtra("action", "");
+                        startActivityForResult(in, 2);
+                    }
+                }
+                getIntent().removeExtra("widgetNoteId");
+            }
+        }
     }
 
     @Override
@@ -188,7 +235,13 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        return true;
+        switch (item.getItemId()) {
+            case R.id.action_Update_Widget:
+                updateWidgets(getApplicationContext());
+                return true;
+            default:
+                return true;
+        }
     }
 
     /**
@@ -300,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
                             selectionArgs                       // the value to compare to
                     );
                     finish();
-                    startActivity(getIntent());
+                    startActivity(this.getIntent());
                 }
                 else if (data.getStringExtra("action").equals("delete"))
                 {
@@ -320,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
                     );
 
                     finish();
-                    startActivity(getIntent());
+                    startActivity(this.getIntent());
                 }
             }
         }
@@ -341,6 +394,20 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
     public void updateItem(int i, Note n)
     {
         mAdapter.updateItemFromListAt(i, n);
-        View v = this.getCurrentFocus();
+    }
+
+    public static void updateWidgets(Context context) {
+        Intent intent = new Intent(context.getApplicationContext(), CollectionWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+        // since it seems the onUpdate() is only fired on that:
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+        int[] ids = widgetManager.getAppWidgetIds(new ComponentName(context, CollectionWidget.class));
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            widgetManager.notifyAppWidgetViewDataChanged(ids, R.id.widget_list);
+
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(intent);
     }
 }

@@ -84,6 +84,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NumberViewHold
         notifyItemChanged(index);
     }
 
+    public void addToList(Note n){
+        list.add(n);
+        notifyItemInserted(mNumberItems);
+        mNumberItems++;
+    }
+
     /**
      * The interface that receives onClick messages.
      */

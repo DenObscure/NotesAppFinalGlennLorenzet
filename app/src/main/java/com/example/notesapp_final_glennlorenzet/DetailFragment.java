@@ -125,8 +125,6 @@ public class DetailFragment extends Fragment {
             @Override
             public void onClick(View v)
             {
-                System.out.println("WANT TO DELETE!!!!!!!!!!!!!");
-
                 // Defines selection criteria for the rows you want to delete
                 String selectionClause = NotesContract.NoteEntry._ID + " LIKE ?";
                 String[] selectionArgs = {getArguments().getString(ARG_NOTE_ID)};
