@@ -199,25 +199,45 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         mNumbersList.setAdapter(mAdapter);
 
 
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
         /* IF INTENT COMING FROM WIDGET */
         Bundle extras = getIntent().getExtras();
         if (extras != null)
         {
             System.out.println(extras);
             String value = extras.getString("widgetNoteId");
-            if (extras.getString("action").equalsIgnoreCase("widget")) {
-                for (Note note : notesList) {
-                    if (note.getId().equalsIgnoreCase(value)) {
-                        Intent in = new Intent(MainActivity.this, EditNoteActivity.class);
-                        in.putExtra("title", note.getTitle());
-                        in.putExtra("content", note.getContent());
-                        in.putExtra("id", note.getId());
+            if (value != null)
+            {
+                if (extras.getString("action").equalsIgnoreCase("widget")) {
+                    for (Note note : notesList) {
+                        if (note.getId().equalsIgnoreCase(value)) {
 
-                        startActivityForResult(in, 2);
+                            Intent in = new Intent(MainActivity.this, EditNoteActivity.class);
+                            in.putExtra("title", note.getTitle());
+                            in.putExtra("content", note.getContent());
+                            in.putExtra("id", note.getId());
+
+                            startActivityForResult(in, 2);
+
+                            getIntent().replaceExtras(new Bundle());
+                            getIntent().setAction("");
+                            getIntent().setData(null);
+                            getIntent().setFlags(0);
+                        }
                     }
+
                 }
-                getIntent().removeExtra("widgetNoteId");
             }
+        }
+        else
+        {
+            System.out.println("extras = null");
         }
     }
 
@@ -408,4 +428,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
         context.sendBroadcast(intent);
     }
+
+
 }
