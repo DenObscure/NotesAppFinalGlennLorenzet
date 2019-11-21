@@ -53,7 +53,8 @@ public class DataProvider implements RemoteViewsService.RemoteViewsFactory {
         Intent fillInIntent = new Intent();
         fillInIntent.putExtra("widgetNoteId", myListView.get(position).getId());
         fillInIntent.putExtra("action", "widget");
-        fillInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        fillInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // |Intent.FLAG_ACTIVITY_SINGLE_TOP
         view.setOnClickFillInIntent(text1, fillInIntent);
 
 
