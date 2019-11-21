@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
     private NoteAdapter mAdapter;
     private RecyclerView mNumbersList;
     private ArrayList<Note> notesList = new ArrayList<Note>();
-    private boolean processed = false;
-
 
     /*
      * If we hold a reference to our Toast, we can cancel it (if it's showing)
@@ -214,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.ListI
                         in.putExtra("title", note.getTitle());
                         in.putExtra("content", note.getContent());
                         in.putExtra("id", note.getId());
-                        in.putExtra("action", "");
+
                         startActivityForResult(in, 2);
                     }
                 }
